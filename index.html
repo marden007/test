@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test</title>
+	<link rel="stylesheet" type="text/css" href="css/simplePagination.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+<div id="light-pagination">
+</div>
+<div id="page">
+	
+</div>
+<button id="saveBtn">Сохранить</button>
+<div id="json"></div>
+</body>
+<script src="js/jquery-3.2.0.min.js"></script>
+<script src="js/jquery.simplePagination.js"></script>
+<script src="js/data.js"></script>
+<script type="text/javascript">
+	//число элементов
+	var numItems = dataJSON.length;
+	//число элементов на странице
+	var numItemsOnPage = 2;
+	//начальная страница
+	var startPage = 1;
+	//output
+	var newJSON = [];
+$(function() {	
+    $('#light-pagination').pagination({
+        items: numItems,
+        itemsOnPage: numItemsOnPage,
+        cssStyle: 'light-theme',
+        currentPage : startPage,
+   		onPageClick : function(pageNum){
+            displayPage(pageNum)
+          }
+    });
+
+    function displayPage(numPage) {
+    	//чистим страницу
+    	$('#page').empty();
+    	$('#json').empty();
+    	//выводим нужные итемы
+    	for (var i = 0; i < numItemsOnPage; i++) {
+    		//номер эл-та в массиве
+    		var k = (numPage-1)*numItemsOnPage+i;
+    		var customFields = '';
+    		Object.keys(dataJSON[k].customFields).map(function(objectKey) {
+			    customFields += '<li>'+objectKey+'<input type="text" data="'+objectKey+'" value="'+dataJSON[k].customFields[objectKey]+'"></li>';
+			});
+    		var str ='<ul class="item" data-num="'+dataJSON[k].number+'">'
+					+'<li>number <input type="text" data="number" value="'+dataJSON[k].number+'"></li>'
+					+'<li>firstName <input type="text" data="firstName" value="'+dataJSON[k].firstName+'"></li>'
+					+'<li>email <input type="text" data="email" value="'+dataJSON[k].email+'"></li>'
+					+'<li>managerComment  <input type="text" data="managerComment" value="'+dataJSON[k].managerComment+'"></li>'
+					+'<li>status  <input type="text" data="status" value="'+dataJSON[k].status+'"></li>'
+					+'<li>createdAt  <input type="text" data="createdAt" value="'+dataJSON[k].createdAt+'"></li>'
+					+'<li>customerid  <input type="text" name="id" value="'+dataJSON[k].customer.id+'"></li>'
+					+'<li>phone  <input type="text" data="phone" value="'+dataJSON[k].phone+'"></li>'
+					+'<li>contragentType  <input type="text" name="contragentType" value="'+dataJSON[k].contragent.contragentType+'"></li>'
+					+'<li>totalSumm <input type="text" data="totalSumm" value="'+dataJSON[k].totalSumm+'"></li>'
+					+'<li>city <input type="text" name="city" value="'+dataJSON[k].customer.address.city+'"></li>'
+					+'<li>customFields(все поля)</li>'
+					+'<ul class="custom">'+customFields+'</ul>'
+				+'</ul>';
+    		$('#page').append(str);
+   		}
+   		$('.item input').on("change focus", function () {
+   			$(this).attr("value", ($(this).val()));
+   			$(this).parents('.item').addClass('changed');
+   		});
+
+   		 $("#saveBtn").on("click", function () {
+   		 	$('#json').empty();
+   		 	newJSON =[];
+   		 	$('ul.changed').filter('.changed').each(function () {
+   		 		var $this = $(this);
+   		 		var num = $this.attr('data-num');
+   		 		for (var k =0; k<dataJSON.length; k++) {
+   		 			var temp = {};
+				  if (dataJSON[k].number == num) {
+				  	temp = dataJSON[k];
+				  	$this.find('input').not(".custom input").each(function() {
+				  		if($(this).attr('data')){
+				  			temp[ $(this).attr('data')]= $(this).val();
+				  		}
+				  	});
+				  	var customFields = {};
+				  	$this.find('.custom input').each(function () {
+				  		customFields[$(this).attr('data')]= $(this).val();
+				  	});
+				  	temp.customFields = customFields;
+				  	temp.customer.id = $this.find('input[name=id]').val();
+				  	temp.contragent.contragentType = $this.find('input[name=contragentType]').val();
+				  	temp.customer.address.city =  $this.find('input[name=city]').val();
+				  	newJSON.push(temp);
+				  }
+				}
+   		 	});
+   		 	$('#json').html(JSON.stringify(newJSON));
+	    })
+    }
+    displayPage(startPage);
+});
+</script>
+</html>

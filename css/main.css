@@ -1,0 +1,12 @@
+ul.item{
+	width: 400px;
+	margin: 20px auto;
+}
+.item li{
+	width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.item li>input{
+	width: 200px;
+}
